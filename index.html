@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>Villámvédelmi besoroló</title>
+<style>
+:root{--bg:#1c1c1e;--bg2:#2c2c2e;--bg3:#3a3a3c;--sep:#48484a;
+  --t:#fff;--t2:rgba(235,235,245,.75);--t3:rgba(235,235,245,.5);
+  --acc:#ffd60a;--inf:#0a84ff;--ok:#30d158;--wa:#ff9f0a;--er:#ff453a;--pu:#bf5af2;--pk:#ff375f}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;
+  background:var(--bg);color:var(--t);font-size:15px;min-height:100vh}
+.tb{display:flex;background:var(--bg2);border-bottom:1px solid var(--sep);position:sticky;top:0;z-index:50}
+.t{flex:1;border:none;background:none;color:var(--t3);font-size:10px;font-weight:500;
+  padding:8px 2px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.t.on{color:var(--acc)}
+.ti{font-size:21px;line-height:1.1}
+.pg{display:none;padding-bottom:80px}
+.pg.on{display:block}
+.sh{font-size:12px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;padding:18px 16px 6px}
+.fld{background:var(--bg2);border-radius:12px;margin:0 12px 6px;overflow:hidden}
+.fsel{width:100%;background:transparent;border:none;color:var(--t);font-size:15px;padding:14px 16px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer}
+.fsel option{background:#2c2c2e;color:#fff}
+.fval{display:flex;justify-content:space-between;align-items:center;padding:0 16px 12px;border-top:1px solid var(--sep)}
+.fval-l{font-size:12px;color:var(--t3)}
+.fval-v{font-size:13px;font-weight:700;color:var(--acc);font-family:monospace;text-align:right;max-width:200px}
+.hint{background:var(--bg3);border-radius:8px;margin:0 12px 10px;padding:10px 13px;font-size:13px;color:var(--t2);line-height:1.5;border-left:3px solid var(--acc);display:none}
+.hint.on{display:block}
+.bb{display:block;width:calc(100% - 24px);margin:6px 12px;padding:16px;border-radius:12px;font-size:17px;font-weight:700;border:none;cursor:pointer;text-align:center}
+.bpri{background:var(--acc);color:#000}
+.bsec{background:var(--bg2);color:var(--er);border:1px solid var(--sep)}
+.bb:active{opacity:.75}
+/* BADGES - koppintható */
+.bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+.ba{border-radius:8px;padding:9px 6px;border:1px solid;text-align:center;cursor:pointer;transition:opacity .1s}
+.ba:active{opacity:.7}
+.baL{font-size:10px;font-weight:600;text-transform:uppercase;opacity:.6;margin-bottom:2px}
+.baV{font-family:monospace;font-size:14px;font-weight:700;word-break:break-all}
+.bVc{background:#0a84ff15;border-color:#0a84ff55;color:var(--inf)}
+.bLc{background:#ff9f0a15;border-color:#ff9f0a55;color:var(--wa)}
+.bFc{background:#30d15815;border-color:#30d15855;color:var(--ok)}
+.bMc{background:#bf5af215;border-color:#bf5af255;color:var(--pu)}
+.bBc{background:#ff375f15;border-color:#ff375f55;color:var(--pk)}
+.bN{background:#48484a20;border-color:#48484a;color:var(--t3)}
+.jb{background:var(--bg2);border-radius:10px;padding:13px 15px;margin-bottom:10px}
+.jl{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.jv{font-family:monospace;font-size:14px;font-weight:700;color:var(--acc);word-break:break-all}
+.al{border-radius:8px;padding:11px 13px;font-size:13px;margin-bottom:8px;border:1px solid;line-height:1.5}
+.ok{background:#30d15815;border-color:#30d15855;color:#30d158}
+.wa{background:#ff9f0a15;border-color:#ff9f0a55;color:#ff9f0a}
+.er{background:#ff453a15;border-color:#ff453a55;color:#ff453a}
+.in{background:#0a84ff15;border-color:#0a84ff55;color:#74b9ff}
+.pu{background:#bf5af215;border-color:#bf5af255;color:#bf5af2}
+.kv{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--sep);gap:10px;font-size:13px}
+.kv:last-child{border-bottom:none}
+.kk{color:var(--t2);flex:1;line-height:1.4}
+.vv{font-family:monospace;font-weight:700;text-align:right;flex-shrink:0}
+.ci{color:var(--inf)}.cw{color:var(--wa)}.cs{color:var(--ok)}.ca{color:var(--acc)}.cp{color:var(--pk)}
+.nrow{display:flex;align-items:center;gap:10px;background:var(--bg2);border-radius:10px;padding:12px 15px;margin:0 12px 8px}
+.ni{background:var(--bg3);border:none;border-radius:8px;color:var(--t);font-size:16px;padding:8px 10px;text-align:right;width:90px;outline:none;font-family:inherit}
+.nu{font-size:13px;color:var(--t3)}
+.seg{display:flex;background:var(--bg3);border-radius:8px;padding:2px;margin:0 12px 10px}
+.sb{flex:1;padding:8px 4px;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:var(--t3)}
+.sb.on{background:var(--bg2);color:var(--t)}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 12px 10px}
+.mc{background:var(--bg2);border-radius:10px;padding:12px}
+.mcl{font-size:11px;color:var(--t3);margin-bottom:3px}
+.mcv{font-family:monospace;font-size:20px;font-weight:700}
+.mcu{font-size:11px;color:var(--t3)}
+.mertbox{display:none;padding:0 12px}
+.mertbox.on{display:block}
+.card{background:var(--bg2);border-radius:12px;margin:0 12px 12px;overflow:hidden}
+.crow{padding:11px 15px;border-bottom:1px solid var(--sep);font-size:13px;color:var(--t2);line-height:1.5}
+.crow:last-child{border-bottom:none}
+.crow.hdr{font-size:14px;color:var(--t);display:flex;justify-content:space-between}
+.crow.hdr span{color:var(--t3);font-size:13px}
+/* MODAL */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100}
+.ov.on{display:block}
+.modal{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-radius:20px 20px 0 0;
+  z-index:101;max-height:80vh;display:flex;flex-direction:column;
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.modal.on{transform:none}
+.mhandle{width:36px;height:4px;background:var(--bg3);border-radius:2px;margin:12px auto 0;flex-shrink:0}
+.mtitle{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;
+  padding:12px 20px 10px;flex-shrink:0;border-bottom:1px solid var(--sep)}
+.mbody{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 20px 40px;flex:1}
+.mcode{font-family:monospace;font-size:22px;font-weight:700;color:var(--acc);margin-bottom:6px}
+.mname{font-size:15px;font-weight:600;color:var(--t);margin-bottom:10px;line-height:1.3}
+.mdesc{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:12px}
+.mtag{display:inline-block;background:var(--bg3);border-radius:5px;padding:2px 8px;font-size:11px;color:var(--t3);margin-bottom:4px;margin-right:4px}
+.msub{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin:10px 0 4px}
+.mitem{font-size:13px;color:var(--t2);line-height:1.5;padding:5px 0;border-bottom:1px solid var(--sep)}
+.mitem:last-child{border-bottom:none}
+.mitem b{color:var(--t)}
+</style>
+</head>
+<body>
+
+<!-- MODAL OVERLAY -->
+<div class="ov" id="ov" onclick="closeModal()"></div>
+<div class="modal" id="modal">
+  <div class="mhandle"></div>
+  <div class="mtitle" id="mtitle">Részletek</div>
+  <div class="mbody" id="mbody"></div>
+</div>
+
+<div class="tb">
+  <button class="t on" onclick="tab('be',0)"><span class="ti">🏠</span>Besorolás</button>
+  <button class="t" onclick="tab('er',1)"><span class="ti">⚡</span>Eredmény</button>
+  <button class="t" onclick="tab('fo',2)"><span class="ti">🌍</span>Földelés</button>
+  <button class="t" onclick="tab('su',3)"><span class="ti">📋</span>Súgó</button>
+</div>
+
+<!-- BESOROLÁS -->
+<div class="pg on" id="pg-be">
+  <div class="sh">Rendeltetés szerinti csoport</div>
+  <div class="fld">
+    <select class="fsel" id="R" onchange="upd('R',this.value)">
+      <option value="">Válasszon...</option>
+      <option value="1">R1 – Lakó, mezőgazdasági, raktár</option>
+      <option value="2">R2 – Iroda, hotel, ipari, kereskedelem</option>
+      <option value="3">R3 – Kórház, iskola, múzeum, tömegszállás</option>
+      <option value="4">R4 – Tűz- és robbanásveszélyes (A,B osztály)</option>
+      <option value="5">R5 – Robbanóanyag, üzemanyag, vegyipari</option>
+    </select>
+    <div class="fval"><span class="fval-l">Kiválasztva:</span><span class="fval-v" id="sv_R">—</span></div>
+  </div>
+  <div class="sh">Magasság szerinti csoport</div>
+  <div class="fld">
+    <select class="fsel" id="M" onchange="upd('M',this.value)">
+      <option value="">Válasszon...</option>
+      <option value="1">M1 – legfeljebb 10 m</option>
+      <option value="2">M2 – 10 és 25 m között</option>
+      <option value="3">M3 – 25 és 60 m között</option>
+      <option value="4">M4 – több mint 60 m</option>
+    </select>
+    <div class="fval"><span class="fval-l">Kiválasztva:</span><span class="fval-v" id="sv_M">—</span></div>
+  </div>
+  <div class="sh">Tető anyaga és szerkezete</div>
+  <div class="fld">
+    <select class="fsel" id="T" onchange="upd('T',this.value)">
+      <option value="">Válasszon...</option>
+      <option value="1">T1 – Nem égő (cserép, beton, kő, pala)</option>
+      <option value="2">T2 – Fémtető (acél, alumínium, réz)</option>
+      <option value="3">T3 – Közepesen égő (bitumen, fa deszkázat)</option>
+      <option value="4">T4 – Könnyen égő (fazsindely, nád, szalma)</option>
+      <option value="5">T5 – Könnyen égő héjazat + éghető tetőszerkezet</option>
+    </select>
+    <div class="fval"><span class="fval-l">Kiválasztva:</span><span class="fval-v" id="sv_T">—</span></div>
+  </div>
+  <div class="sh">Körítő falak anyaga</div>
+  <div class="fld">
+    <select class="fsel" id="K" onchange="upd('K',this.value)">
+      <option value="">Válasszon...</option>
+      <option value="1">K1 – Nem égő fal (beton, tégla, kő)</option>
+      <option value="2">K2 – Fémből készült fal (acélszerkezet)</option>
+      <option value="3">K3 – Égő fal (fa, műanyag, vegyes)</option>
+    </select>
+    <div class="fval"><span class="fval-l">Kiválasztva:</span><span class="fval-v" id="sv_K">—</span></div>
+  </div>
+  <div class="sh">Levegő szennyezettsége</div>
+  <div class="fld">
+    <select class="fsel" id="S" onchange="upd('S',this.value)">
+      <option value="">Válasszon...</option>
+      <option value="1">S1 – Normál ipari / városi levegő</option>
+      <option value="2">S2 – Enyhén szennyezett, tengeri klíma</option>
+      <option value="3">S3 – Erősen szennyezett, vegyipari</option>
+      <option value="4">S4 – Rendkívül agresszív (sav, lúg, vegyi gőz)</option>
+    </select>
+    <div class="fval"><span class="fval-l">Kiválasztva:</span><span class="fval-v" id="sv_S">—</span></div>
+  </div>
+  <div class="sh">Másodlagos hatások szerinti csoport</div>
+  <div class="fld">
+    <select class="fsel" id="H" onchange="upd('H',this.value)">
+      <option value="">Válasszon...</option>
+      <option value="1">H1 – Nincs érzékeny berendezés → B0</option>
+      <option value="2">H2 – Kisebb gazdasági kár lehetséges → B1</option>
+      <option value="3">H3 – Jelentős anyagi kár lehetséges → B2e</option>
+      <option value="4">H4 – Személyek veszélye / tűzkockázat → B3e</option>
+      <option value="5">H5 – Robbanásveszélyes légtér → B4e</option>
+    </select>
+    <div class="fval"><span class="fval-l">Kiválasztva:</span><span class="fval-v" id="sv_H">—</span></div>
+  </div>
+  <div class="sh">Elhelyezés (környezet)</div>
+  <div class="fld">
+    <select class="fsel" id="E" onchange="upd('E',this.value)">
+      <option value="">Válasszon...</option>
+      <option value="1">Síkterepen, egyedül álló épület</option>
+      <option value="2">Síkterepen, hasonló magasságú épületek közt</option>
+      <option value="3">Városi beépítésben, épületek között</option>
+      <option value="4">Mélyedésben, völgyben, védett helyen</option>
+    </select>
+    <div class="fval"><span class="fval-l">Kiválasztva:</span><span class="fval-v" id="sv_E">—</span></div>
+  </div>
+  <div class="hint" id="hint"></div>
+  <button class="bb bpri" onclick="besorolas()">⚡ Besorolás meghatározása</button>
+  <button class="bb bsec" onclick="resetAll()">Törlés</button>
+</div>
+
+<!-- EREDMÉNY -->
+<div class="pg" id="pg-er">
+  <div id="er0" style="padding:50px 20px;text-align:center;color:var(--t3)">
+    <div style="font-size:56px;margin-bottom:14px">⚡</div>
+    <div style="font-size:17px;font-weight:700;color:var(--t);margin-bottom:8px">Még nincs eredmény</div>
+    <div style="font-size:14px;line-height:1.5">Töltse ki a Besorolás lapot,<br>majd nyomja meg a gombot.</div>
+  </div>
+  <div id="er1" style="display:none">
+    <div class="sh">Fokozatok <span style="font-size:10px;color:var(--t3);font-weight:400;text-transform:none;letter-spacing:0">— koppintson a részletekért</span></div>
+    <div style="padding:0 12px 4px">
+      <div class="bgrid" id="badges"></div>
+      <div class="jb"><div class="jl">Összefoglaló jelölés</div><div class="jv" id="jel">—</div></div>
+    </div>
+    <div class="sh">Figyelmeztetések</div>
+    <div style="padding:0 12px" id="alerts"></div>
+    <div class="sh">Részletek</div>
+    <div class="card"><div style="padding:10px 15px" id="kvwrap"></div></div>
+    <div class="sh">Belső villámvédelem</div>
+    <div style="padding:0 12px;margin-bottom:10px"><div class="al pu" id="bsec"></div></div>
+    <div class="sh">Elhelyezés hatása</div>
+    <div style="padding:0 12px;margin-bottom:10px" id="elhwrap"></div>
+    <div class="sh">s elválasztási távolság (7.1.2. §)</div>
+    <div style="padding:0 12px;margin-bottom:10px">
+      <div class="nrow" style="margin:0 0 8px">
+        <span style="flex:1;color:var(--t)">Áramút hossza (l)</span>
+        <input class="ni" type="number" id="sl" value="10" min="0.5" step="0.5" inputmode="decimal" oninput="calcS()">
+        <span class="nu">m</span>
+      </div>
+      <div class="al ok">Szükséges s = <strong id="sr" style="font-family:monospace;font-size:17px">0,50 m</strong></div>
+      <div style="font-size:12px;color:var(--t3);margin-top:5px">Ha kisebb a tényleges távolság → potenciálkiegyenlítő kötés szükséges (7.1.2. §).</div>
+    </div>
+  </div>
+</div>
+
+<!-- FÖLDELÉS -->
+<div class="pg" id="pg-fo">
+  <div class="sh">Számítási mód</div>
+  <div class="seg">
+    <button class="sb on" onclick="setMode('eredő',this)">Összefüggő ×3</button>
+    <button class="sb" onclick="setMode('egyedi',this)">Egyedi ×6</button>
+    <button class="sb" onclick="setMode('fix2',this)">F4/r ≤2Ω</button>
+  </div>
+  <div class="hint on" id="mhint">Összefüggő rendszer (csak villámhárító megbontásával szétválasztható): r ≤ 3·√(ρ/A)</div>
+  <div class="sh">Épület mérete</div>
+  <div class="nrow"><span style="flex:1;color:var(--t)">Hossz</span><input class="ni" type="number" id="fh" placeholder="m" min="1" inputmode="decimal" oninput="foldCalc()"><span class="nu">m</span></div>
+  <div class="nrow"><span style="flex:1;color:var(--t)">Szélesség</span><input class="ni" type="number" id="fs" placeholder="m" min="1" inputmode="decimal" oninput="foldCalc()"><span class="nu">m</span></div>
+  <div class="sh">Talaj fajlagos ellenállás (ρ)</div>
+  <div class="fld">
+    <select class="fsel" id="RHO" onchange="rhoChg(this.value)">
+      <option value="">Válasszon talajfajtát...</option>
+      <option value="20">Talajvíz / humuszos talaj – 20 Ω·m</option>
+      <option value="10">Tőzeges talaj – 10 Ω·m</option>
+      <option value="30">Agyag, nedves – 30 Ω·m</option>
+      <option value="100a">Agyag, száraz – 100 Ω·m</option>
+      <option value="40">Felületi víz (tó, folyó) – 40 Ω·m</option>
+      <option value="60">Homokos talaj, nedves – 60 Ω·m</option>
+      <option value="500">Homokos talaj, száraz – 500 Ω·m</option>
+      <option value="200a">Kavicsos, agyagos talaj – 200 Ω·m</option>
+      <option value="100b">Kavicsos talaj, nedves – 100 Ω·m</option>
+      <option value="1000">Kavicsos talaj, száraz – 1000 Ω·m</option>
+      <option value="200b">Repedéses mészkő (karszt) – 200 Ω·m</option>
+      <option value="6000">Tömör, száraz szikla – 6000 Ω·m</option>
+      <option value="mert">📐 Mért érték megadása...</option>
+    </select>
+    <div class="fval"><span class="fval-l">Kiválasztva:</span><span class="fval-v" id="sv_RHO">—</span></div>
+  </div>
+  <div class="mertbox" id="mertbox">
+    <div class="nrow"><span style="flex:1;color:var(--t)">Mért ρ érték</span><input class="ni" type="number" id="rhom" placeholder="Ω·m" min="1" inputmode="decimal" oninput="foldCalc()"><span class="nu">Ω·m</span></div>
+    <div class="hint on" style="margin-bottom:10px">Helyszíni mérés (MSZ 4851/2) szerint — ezt kell elsősorban alkalmazni.</div>
+  </div>
+  <button class="bb bpri" style="margin-top:8px" onclick="foldCalc()">Számítás</button>
+  <div id="fo_res" style="display:none">
+    <div class="sh">Eredmény</div>
+    <div class="mgrid">
+      <div class="mc"><div class="mcl">Alapterület (A)</div><div class="mcv" id="fA" style="color:var(--inf)">—</div><div class="mcu">m²</div></div>
+      <div class="mc"><div class="mcl">Talaj ρ</div><div class="mcv" id="fRho" style="color:var(--wa)">—</div><div class="mcu" id="rhosrc">Ω·m</div></div>
+    </div>
+    <div class="mc" style="margin:0 12px 10px"><div class="mcl">Megengedett r<sub>max</sub></div><div class="mcv" id="fRmax" style="color:var(--acc)">—</div><div class="mcu">Ω</div><div style="font-size:11px;color:var(--t3);margin-top:3px" id="fForm">—</div></div>
+    <div style="padding:0 12px" id="foal"></div>
+  </div>
+</div>
+
+<!-- SÚGÓ -->
+<div class="pg" id="pg-su">
+  <div class="sh">Felfogó (V) fokozatok</div>
+  <div class="card">
+    <div class="crow" onclick="showDetail('V','V0o')"><b>V0o</b> — Nincs villámhárító ›</div>
+    <div class="crow" onclick="showDetail('V','V1o')"><b>V1o</b> — Természetes felfogó ›</div>
+    <div class="crow" onclick="showDetail('V','V2')"><b>V2a/b/c</b> — Egyszerűsített felfogórendszer ›</div>
+    <div class="crow" onclick="showDetail('V','V3')"><b>V3a/b/c</b> — Normál felfogórendszer ›</div>
+    <div class="crow" onclick="showDetail('V','V4')"><b>V4a/b/c</b> — Biztonsági felfogórendszer ›</div>
+    <div class="crow" onclick="showDetail('V','V5')"><b>V5b/c</b> — Növelt biztonságú felfogórendszer ›</div>
+    <div class="crow" onclick="showDetail('V','V6')"><b>V6c</b> — Különleges biztonságú felfogórendszer ›</div>
+  </div>
+  <div class="sh">Levezető (L) fokozatok</div>
+  <div class="card">
+    <div class="crow" onclick="showDetail('L','L0o')"><b>L0o</b> — Nincs levezető ›</div>
+    <div class="crow" onclick="showDetail('L','L1o')"><b>L1o</b> — Természetes levezető ›</div>
+    <div class="crow" onclick="showDetail('L','L2')"><b>L2a/b</b> — Egyetlen levezető ›</div>
+    <div class="crow" onclick="showDetail('L','L3')"><b>L3a/b</b> — Legalább 2 levezető, ≤15 m ›</div>
+    <div class="crow" onclick="showDetail('L','L4')"><b>L4a/b/c</b> — Legalább 2 levezető, ≤10 m ›</div>
+    <div class="crow" onclick="showDetail('L','L5')"><b>L5a/b/c</b> — L4 + vízszintes összekötések ›</div>
+  </div>
+  <div class="sh">Földelés (F) fokozatok</div>
+  <div class="card">
+    <div class="crow" onclick="showDetail('F','F0')"><b>F0/x</b> — Nincs földelő ›</div>
+    <div class="crow" onclick="showDetail('F','F1')"><b>F1/x, F1/r</b> — Természetes földelő ›</div>
+    <div class="crow" onclick="showDetail('F','F2')"><b>F2/x</b> — Egyetlen mesterséges földelő ›</div>
+    <div class="crow" onclick="showDetail('F','F3')"><b>F3/x, F3/r</b> — Legalább 2 földelő ›</div>
+    <div class="crow" onclick="showDetail('F','F4')"><b>F4/r</b> — Gyűrűs/hálós rendszer ›</div>
+  </div>
+  <div class="sh">Méretfokozatok</div>
+  <div class="card">
+    <div class="crow" onclick="showDetail('meret','n')"><b>n</b> — Normálméret ›</div>
+    <div class="crow" onclick="showDetail('meret','k')"><b>k</b> — Közepes méret ›</div>
+    <div class="crow" onclick="showDetail('meret','e')"><b>e</b> — Erős méret ›</div>
+    <div class="crow" onclick="showDetail('meret','ek')"><b>ek</b> — Erős különleges méret ›</div>
+  </div>
+  <div class="sh">Belső VV (B) fokozatok</div>
+  <div class="card">
+    <div class="crow hdr"><span>H1 → <b>B0</b></span><span>Nincs intézkedés</span></div>
+    <div class="crow hdr"><span>H2 → <b>B1</b></span><span>Potenciálkiegyenlítés</span></div>
+    <div class="crow hdr"><span>H3 → <b>B2e</b></span><span>PE + koordinált SPD</span></div>
+    <div class="crow hdr"><span>H4 → <b>B3e</b></span><span>PE + SPD + árnyékolás</span></div>
+    <div class="crow hdr"><span>H5 → <b>B4e</b></span><span>Teljes + I.szint + tokozott</span></div>
+  </div>
+  <div style="text-align:center;padding:20px;font-size:12px;color:var(--t3);line-height:1.8">
+    MSZ 274/3–81 · TvMI 7.6:2024.02.01.<br>
+    MSZ 274-2-1M-2:2001 · MSZ 274-3-2M:2001<br>
+    Nem helyettesíti a szakértői véleményt.
+  </div>
+</div>
+
+<script>
+// ====== RÉSZLETES MAGYARÁZATOK ======
+var DETAILS={
+  V:{
+    V0o:{title:'Felfogó: V0o',name:'Villámhárító nem szükséges',
+      desc:'A besorolás alapján az épületre nem kötelező villámhárítót létesíteni. Ha mégis létesítenek, a felfogó elrendezésére nincs követelmény, de az épülethez viszonyított helyzetre az 1. táblázat T-csoportja alapján fokozatot kell megállapítani.',
+      tags:['MSZ 274/3–81, 2.5. §'],
+      items:[]},
+    V1o:{title:'Felfogó: V1o',name:'Természetes felfogórendszer',
+      desc:'Kizárólag természetes felfogókból álló rendszer. Az épület fémtetője, vagy a tetőn lévő fémrészek összekötött hálózata, amelytől a tető egyetlen pontja sem esik 5 m-nél távolabb.',
+      tags:['MSZ 274/3–81, 4.1.2. §','Épülethez viszonyított helyzet: o'],
+      items:[
+        {b:'Feltétel:',t:'A tető fémből készült, vagy a tetőn lévő fémrészek összekötöttek és 5 m-en belül fedik az egész tetőt.'},
+        {b:'T2 fémtető esetén:',t:'A fémtető maga természetes felfogóként alkalmazható (V1o fokozat).'},
+        {b:'Nincs mesterséges felfogórúd:',t:'Csak természetes elemek felhasználása megengedett.'}]},
+    V2:{title:'Felfogó: V2a / V2b / V2c',name:'Egyszerűsített felfogórendszer',
+      desc:'Egyszerűsített felfogórendszer — egyetlen felfogórúd meredek sátortetőn, vagy felfogóvezetők olyan rendszere, hogy a tető egyetlen pontja sem esik vízszintesen 10 m-nél távolabb a felfogótól.',
+      tags:['MSZ 274/3–81, 4.1.3. §'],
+      items:[
+        {b:'V2a:',t:'A felfogórendszer közvetlenül a védendő felületen van, vagy a köztük lévő távolság kisebb mint 0,15 m.'},
+        {b:'V2b:',t:'A felfogóvezetők és a védendő felület közötti távolság legalább 0,15 m. Tartók bármilyen anyagból készülhetnek.'},
+        {b:'V2c:',t:'A felfogóvezetők és az épület között mindenütt legalább 0,50 m távolság van. Szigetelő tartórúd alkalmazása szükséges (4.3.2.3. §).'},
+        {b:'Meredek tető (>20°):',t:'Egyetlen felfogórúd a tetőgerinc legmagasabb pontján, vagy felfogóvezetők a gerinc mentén elegendő.'},
+        {b:'Lapos tető (<20°):',t:'Felfogóvezetők hálózata, hogy a tető egyetlen pontja sem esik 10 m-nél távolabb.'}]},
+    V3:{title:'Felfogó: V3a / V3b / V3c',name:'Normál felfogórendszer',
+      desc:'A legelterjedtebb fokozat. Három szerkesztési módszer valamelyikével kell kielégíteni: gömb módszer (R=100 m), körlap módszer (d=20 m), vagy védőszög módszer (α=45°, max. 40 m magasságig).',
+      tags:['MSZ 274/3–81, 4.1.4. §','TvMI 7.6, 10. fejezet'],
+      items:[
+        {b:'Gömb módszer (R=100 m):',t:'Egy R=100 m sugarú képzeletbeli gömböt nem lehet a felfogórendszer érintése nélkül a védendő felülettel érintkezésbe hozni.'},
+        {b:'Körlap módszer (d=20 m):',t:'Egy d=20 m átmérőjű körlapot nem lehet a felfogó érintése nélkül a tetőre helyezni.'},
+        {b:'Védőszög (α=45°):',t:'A tetőél és a felfogó közötti szög mindenütt kisebb 45°-nál. Csak ≤40 m magasságig alkalmazható!'},
+        {b:'V3a:',t:'Felfogó közvetlenül a tetőn, vagy <0,15 m távolságra.'},
+        {b:'V3b:',t:'Felfogó ≥0,15 m távolságra a tetőfelülettől.'},
+        {b:'V3c:',t:'Felfogó ≥0,50 m távolságra — szigetelő tartórúd kötelező (4.3.2.3. §).'}]},
+    V4:{title:'Felfogó: V4a / V4b / V4c',name:'Biztonsági felfogórendszer',
+      desc:'Magasabb biztonsági szintű felfogórendszer. A normál (V3) fokozat szigorúbb paramétereivel kell kielégíteni.',
+      tags:['MSZ 274/3–81, 4.1.5. §'],
+      items:[
+        {b:'Gömb módszer:',t:'R = 80 m (V3-nál 100 m volt).'},
+        {b:'Körlap módszer:',t:'d = 15 m (V3-nál 20 m volt).'},
+        {b:'Védőszög:',t:'α = 30° (V3-nál 45° volt). Csak ≤40 m magasságig.'},
+        {b:'V4a:',t:'Felfogó közvetlenül a tetőn (<0,15 m).'},
+        {b:'V4b:',t:'Felfogó ≥0,15 m távolságra.'},
+        {b:'V4c:',t:'Felfogó ≥0,50 m távolságra — szigetelő tartórúd kötelező.'}]},
+    V5:{title:'Felfogó: V5b / V5c',name:'Növelt biztonságú felfogórendszer',
+      desc:'Az R gömb sugara a magasságtól függ. Kizárólag b és c helyzetfokozatban alkalmazható.',
+      tags:['MSZ 274/3–81, 4.1.6. §'],
+      items:[
+        {b:'M ≤ 20 m esetén:',t:'R = 40 m'},
+        {b:'20 m < M < 50 m esetén:',t:'R = M + 20 m'},
+        {b:'M ≥ 50 m esetén:',t:'R = 70 m'},
+        {b:'V5b:',t:'Felfogó ≥0,15 m távolságra a védendő felülettől.'},
+        {b:'V5c:',t:'Felfogó ≥0,50 m távolságra — szigetelő tartórúd kötelező.'}]},
+    V6:{title:'Felfogó: V6c',name:'Különleges biztonságú felfogórendszer',
+      desc:'A legmagasabb felfogó fokozat. Kizárólag c helyzetfokozatban alkalmazható. A gömb sugara a magasságtól függ.',
+      tags:['MSZ 274/3–81, 4.1.7. §'],
+      items:[
+        {b:'M ≤ 50 m esetén:',t:'R = M + 10 m'},
+        {b:'M > 50 m esetén:',t:'R = 60 m'},
+        {b:'V6c:',t:'Felfogó ≥0,50 m távolságra — szigetelő tartórúd kötelező (4.3.2.3. §).'}]}
+  },
+  L:{
+    L0o:{title:'Levezető: L0o',name:'Nincs levezető',
+      desc:'Sem természetes, sem mesterséges levezető nincs. Csak akkor állapítható meg, ha a felfogó fokozata is V0o (nincs villámhárító).',
+      tags:['MSZ 274/3–81, 5.1.1. §'],
+      items:[]},
+    L1o:{title:'Levezető: L1o',name:'Természetes levezető',
+      desc:'Kizárólag természetes levezetőkből álló rendszer. Az épület fémből készült vagy fémmel burkolt fala, összefüggő vasbeton acélbetét, vagy összefüggő fémszerkezet.',
+      tags:['MSZ 274/3–81, 5.1.2. §','Épülethez viszonyított helyzet: o'],
+      items:[
+        {b:'Fémfal (K2):',t:'Az épület fémből készült vagy fémmel burkolt fala természetes levezetőként alkalmazható.'},
+        {b:'Vasbeton:',t:'A vasbeton épületszerkezet fémesen összefüggő (bandázsolással kötött) acélbetétje természetes levezető.'},
+        {b:'Fémszerkezet:',t:'Összefüggő fémszerkezet, amelynek függőleges elemeik között a magasságuknál kisebb a távolság.'}]},
+    L2:{title:'Levezető: L2a / L2b',name:'Egyetlen levezető',
+      desc:'Egyetlen mesterséges levezető, olyan helyen, ahol a felfogó bármely pontjától a levezetőig mért áramút vízszintes vetülete nem hosszabb 20 m-nél.',
+      tags:['MSZ 274/3–81, 5.1.3. §'],
+      items:[
+        {b:'Áramút korlát:',t:'Max. 20 m vízszintes vetület a felfogó bármely pontjától a levezetőig.'},
+        {b:'L2a:',t:'A levezető közvetlenül a fal felületén van, vagy attól 0,15 m-nél kisebb távolságra, vagy be van építve a falba.'},
+        {b:'L2b:',t:'A levezető és az épület között legalább 0,15 m távolság van.'},
+        {b:'Rögzítés:',t:'Külső falon legalább 3 méterenként kell rögzíteni (5.3.6. §).'}]},
+    L3:{title:'Levezető: L3a / L3b',name:'Legalább 2 levezető, ≤15 m',
+      desc:'Legalább két levezető olyan elrendezésben, hogy a felfogó bármely pontjától a legközelebbi levezetőig mért áramút vízszintes vetülete nem hosszabb 15 m-nél.',
+      tags:['MSZ 274/3–81, 5.1.4. §'],
+      items:[
+        {b:'Minimum 2 db levezető:',t:'Egymástól legalább 1 m távolságra kell elhelyezni, hogy külön levezetőnek számíthassanak.'},
+        {b:'Áramút korlát:',t:'Max. 15 m vízszintes vetület (eredő áramút).'},
+        {b:'Párhuzamos áramutak:',t:'Eredő áramút: 1/le = 1/l1 + 1/l2 + ... képlettel számítható.'},
+        {b:'L3a:',t:'Levezető közvetlenül a falon (<0,15 m).'},
+        {b:'L3b:',t:'Levezető ≥0,15 m távolságra a faltól.'}]},
+    L4:{title:'Levezető: L4a / L4b / L4c',name:'Legalább 2 levezető, ≤10 m',
+      desc:'Az L3 fokozat szigorúbb változata: az áramút vízszintes vetülete max. 10 m lehet.',
+      tags:['MSZ 274/3–81, 5.1.5. §'],
+      items:[
+        {b:'Áramút korlát:',t:'Max. 10 m vízszintes vetület (eredő áramút).'},
+        {b:'L4a:',t:'Levezető közvetlenül a falon (<0,15 m).'},
+        {b:'L4b:',t:'Levezető ≥0,15 m távolságra a faltól.'},
+        {b:'L4c:',t:'Levezető ≥0,50 m távolságra a faltól.'}]},
+    L5:{title:'Levezető: L5a / L5b / L5c',name:'L4 + vízszintes összekötések',
+      desc:'Az L4 fokozat feltételei PLUSZ: minden levezető felül vízszintesen össze van kötve egymással (a felfogóhoz való csatlakozástól 2 m-en belül), és 20 m-enként közbülső összekötések is szükségesek.',
+      tags:['MSZ 274/3–81, 5.1.6. §'],
+      items:[
+        {b:'Felső összekötés:',t:'A felfogóhoz való csatlakozástól legfeljebb 2 m-re, minden levezetőt vízszintesen össze kell kötni.'},
+        {b:'Közbülső összekötés:',t:'20 m-nél hosszabb levezetők esetén a levezetők mentén mért távolság 20 m-enként közbülső összekötés szükséges.'},
+        {b:'L5a:',t:'Levezető közvetlenül a falon (<0,15 m).'},
+        {b:'L5b:',t:'Levezető ≥0,15 m távolságra a faltól.'},
+        {b:'L5c:',t:'Levezető ≥0,50 m távolságra a faltól.'},
+        {b:'L5d esetén:',t:'A vízszintes összekötések elhagyhatók, mert a d fokozatú (független) levezetőrendszernél nincs áramút-korlát.'}]}
+  },
+  F:{
+    F0:{title:'Földelés: F0/x',name:'Nincs földelő',
+      desc:'Sem természetes, sem mesterséges földelő nincs. Csak akkor állapítható meg, ha sem felfogó, sem levezető nincs (V0o–L0o).',
+      tags:['MSZ 274/3–81, 6.1.1. §'],items:[]},
+    F1:{title:'Földelés: F1/x és F1/r',name:'Természetes földelő',
+      desc:'Csak természetes földelő van: az épület talajjal érintkező fémrésze, acélbetétes betonalapja, vagy a talajba ágyazott kiterjedt fémtárgy (pl. csőhálózat).',
+      tags:['MSZ 274/3–81, 6.1.2. §'],
+      items:[
+        {b:'F1/x:',t:'Természetes földelő, a földelési ellenállás nagyságára nincs előírás.'},
+        {b:'F1/r:',t:'Természetes földelő, de az ellenállásnak teljesítenie kell az r ≤ 3·√(ρ/A) vagy r ≤ 2Ω korlátot.'},
+        {b:'Betonalapföldelés:',t:'Az épület acélbetétes betonalapja természetes földelőként alkalmazható.'},
+        {b:'Csővezeték:',t:'A szigetelés nélkül a talajba ágyazott csőhálózat természetes földelőként alkalmazható (ha összekötése nem tilalmazott).'}]},
+    F2:{title:'Földelés: F2/x',name:'Egyetlen mesterséges földelő',
+      desc:'Egyetlen mesterséges (épített) földelő. Az ellenállásra nincs előírás, de a földelő méretének meg kell felelnie a 6.3.7. §-nak.',
+      tags:['MSZ 274/3–81, 6.1.3. §', '6.3.7. §'],
+      items:[
+        {b:'F2/x:',t:'Egyetlen mesterséges földelő, ellenállásra nincs követelmény.'},
+        {b:'Minimális méret (6.3.7.1):',t:'Legalább 2 m hosszú függőleges rúd, vagy 4 m vízszintes vezető, vagy 5 m² talajérintkezési felületű lemez, vagy acélbetétes betonalap.'},
+        {b:'Fémtartályoknál:',t:'F2 fokozat nem állapítható meg — legalább két földelő szükséges (9.4.4. §).'}]},
+    F3:{title:'Földelés: F3/x és F3/r',name:'Legalább 2 földelő',
+      desc:'Legalább két mesterséges földelő, amelyek lehetnek különállóak vagy összekötöttek.',
+      tags:['MSZ 274/3–81, 6.1.4. §'],
+      items:[
+        {b:'F3/x:',t:'≥2 mesterséges földelő, ellenállásra nincs követelmény.'},
+        {b:'F3/r (összefüggő):',t:'r ≤ 3·√(ρ/A) — összefüggő (csak megbontással szétválasztható) rendszernél.'},
+        {b:'F3/r (egyedi):',t:'r ≤ 6·√(ρ/A) — vizsgálóösszekötővel leválasztható egyedi földelőnél.'},
+        {b:'Ha r nem tartható:',t:'Több vagy mélyebb földelőrúd szükséges. Agyagos talajba mélyített rúd jobb eredményt ad.'}]},
+    F4:{title:'Földelés: F4/r',name:'Gyűrűs / hálós / keretes rendszer',
+      desc:'A legmagasabb földelési fokozat. Gyűrűsföldelő, keretföldelő, földelőháló, vagy épület betonalapföldelése. Kötelező, ha R4/R5 rendeltetés és/vagy B3e/B4e belső VV fokozat van előírva.',
+      tags:['MSZ 274/3–81, 6.1.5. §','TvMI 7.6, 10.3.4.4. §'],
+      items:[
+        {b:'F4/r korlát:',t:'r ≤ 2 Ω (fix korlát, nem függ a talaj-fajlagosságtól).'},
+        {b:'Gyűrűsföldelő:',t:'Az épület alap körül zárt gyűrűt alkotó, a talajba fektetett vezető.'},
+        {b:'Betonalapföldelés:',t:'A vasbeton alap összefüggő acélbetét-hálózata kitűnő F4/r fokozatú földelőként alkalmazható.'},
+        {b:'B3e/B4e esetén:',t:'F0/x, F1/x, F2/x földelési fokozat nem alkalmazható — minimum F3/r, és ha R4/R5 is, akkor F4/r szükséges.'},
+        {b:'Csatlakozási irány:',t:'A levezetőt úgy kell csatlakoztatni, hogy az áramút legalább két irányban vezessen tovább a földelőbe (6.3.4. §).'}]}
+  },
+  meret:{
+    n:{title:'Méretfokozat: n',name:'Normálméret',
+      desc:'Az alapfokozat, R1–R2 rendeltetésű épületeknél normál légköri szennyezettség (S1) esetén alkalmazható. A legkisebb megengedett méret.',
+      tags:['MSZ 274/3–81, 3.6. §','5. táblázat'],
+      items:[
+        {b:'Acél huzal:',t:'Min. Ø 6,0 mm'},
+        {b:'Acél szalag:',t:'Min. 10 × 3 mm'},
+        {b:'Acél idomacél/rúd:',t:'Min. 30 mm² keresztmetszet'},
+        {b:'Acél sodronykötél:',t:'Névleges Ø 8 mm, huzal min. Ø 1,6 mm'},
+        {b:'Alumínium huzal:',t:'Min. Ø 8,0 mm'},
+        {b:'Alumínium szalag:',t:'Min. 20 × 4 mm'},
+        {b:'Réz huzal:',t:'Min. Ø 6,0 mm'},
+        {b:'Réz szalag:',t:'Min. 10 × 3 mm'}]},
+    k:{title:'Méretfokozat: k',name:'Közepes méret',
+      desc:'Közepes méretfokozat. R3 rendeltetés esetén, vagy enyhébb szennyezettség (S2) esetén R1–R2 épületeknél is szükséges.',
+      tags:['MSZ 274/3–81, 3.6. §','5. táblázat'],
+      items:[
+        {b:'Acél huzal:',t:'Min. Ø 8,0 mm'},
+        {b:'Acél szalag:',t:'Min. 20 × 3 mm'},
+        {b:'Acél idomacél/rúd:',t:'Min. 60 mm² keresztmetszet'},
+        {b:'Acél sodronykötél:',t:'Névleges Ø 10 mm, huzal min. Ø 2,0 mm'},
+        {b:'Alumínium huzal:',t:'Min. Ø 10,0 mm'},
+        {b:'Réz huzal:',t:'Min. Ø 8,0 mm'},
+        {b:'Réz szalag:',t:'Min. 20 × 3 mm'}]},
+    e:{title:'Méretfokozat: e',name:'Erős méret',
+      desc:'Erős méretfokozat. Erősen szennyezett légkör (S3) esetén, R4–R5 rendeltetésnél, vagy falba épített alkatrészeknél kötelező. Korrózióvédelem is szükséges!',
+      tags:['MSZ 274/3–81, 3.6. §','5. táblázat','8.1.4. §'],
+      items:[
+        {b:'Acél huzal:',t:'Min. Ø 10,0 mm'},
+        {b:'Acél szalag:',t:'Min. 20 × 5 mm vagy 25 × 4 mm'},
+        {b:'Acél idomacél/rúd:',t:'Min. 100 mm² keresztmetszet'},
+        {b:'Acél csőfal:',t:'Min. 4 mm'},
+        {b:'Réz huzal:',t:'Min. Ø 8,0 mm'},
+        {b:'Réz szalag:',t:'Min. 20 × 4 mm'},
+        {b:'Korrózióvédelem:',t:'S3 és S4 csoportban az acél alkatrészeket korrózió ellen védeni kell (festés megengedett).'}]},
+    ek:{title:'Méretfokozat: ek',name:'Erős különleges méret',
+      desc:'A legmagasabb méretfokozat. Rendkívül agresszív légköri szennyezettség (S4) esetén, vagy különleges vegyi hatások esetén. A korrózióveszély szempontjából az anyagot egyedileg kell megválasztani.',
+      tags:['MSZ 274/3–81, 3.6. §','5. táblázat','8.1.5. §'],
+      items:[
+        {b:'Acél huzal:',t:'Min. Ø 10,0 mm'},
+        {b:'Acél szalag:',t:'Min. 20 × 5 mm'},
+        {b:'Acél sodronykötél:',t:'Névleges Ø 16 mm, huzal min. Ø 3,2 mm'},
+        {b:'Réz huzal:',t:'Min. Ø 8,0 mm'},
+        {b:'Réz szalag:',t:'Min. 20 × 4 mm'},
+        {b:'Megjegyzés:',t:'S4 csoportnál az acél, alumínium és réz közül a vegyi hatásnak (lúgos, savas, oxidáló) ellenállóbbat kell választani (8.1.2.5. §).'}]}
+  }
+};
+
+// ====== ADATBÁZIS ======
+var VT=[[["V0o","V0o","V2a","V3a"],["V0o","V1o","V1o","V1o"],["V0o","V0o","V2b","V3b"],["V0o","V0o","V2c","V3c"],["V0o","V2c","V2c","V3c"]],[["V0o","V2a","V3a","V3a"],["V1o","V1o","V1o","V1o"],["V0o","V2b","V3b","V3b"],["V2c","V2c","V3c","V3c"],["V2c","V3c","V3c","V3c"]],[["V3a","V3a","V3a","V4a"],["V1o","V1o","V1o","V1o"],["V3b","V3b","V4b","V4b"],["V3c","V3c","V4c","V4c"],["V3c","V4c","V4c","V4c"]],[["V4b","V4b","V5b","V5b"],["V1o","V1o","V1o","V1o"],["V4c","V4c","V5c","V5c"],["V4c","V5c","V5c","V5c"],["V4c","V5c","V5c","V6c"]],[["V4b","V4b","V5b","V5b"],["V1o","V1o","V1o","V1o"],["V4c","V5c","V5c","V5c"],["V5c","V5c","V6c","V6c"],["V5c","V6c","V6c","V6c"]]];
+var LFT=[[[ {L:"L0o",F:"F0/x"},{L:"L0o",F:"F0/x"},{L:"L0o",F:"F0/x"}],[{L:"L0o/L2a",F:"F0/x / F2/x"},{L:"L1o",F:"F0/x"},{L:"L0o/L2b",F:"F0/x / F2/x"}],[{L:"L2a/L3a",F:"F2/x / F3/x"},{L:"L1o",F:"F1/x"},{L:"L2b/L3b",F:"F2/x / F3/x"}],[{L:"L4a",F:"F3/r"},{L:"L1o",F:"F1/r"},{L:"L4b",F:"F3/r"}]],[[{L:"L0o/L2a",F:"F0/x / F2/x"},{L:"L1o",F:"F0/x"},{L:"L0o/L2b",F:"F0/x / F2/x"}],[{L:"L2a/L3a",F:"F2/x / F3/r"},{L:"L1o",F:"F1/x"},{L:"L2b/L3b",F:"F2/x / F3/r"}],[{L:"L4a",F:"F3/r"},{L:"L1o",F:"F1/r"},{L:"L4b",F:"F3/r"}],[{L:"L5a",F:"F3/r"},{L:"L1o",F:"F1/r"},{L:"L5b",F:"F3/r"}]],[[{L:"L3a",F:"F3/r"},{L:"L1o",F:"F1/r"},{L:"L3b",F:"F3/r"}],[{L:"L3a",F:"F3/r"},{L:"L1o",F:"F1/r"},{L:"L4b",F:"F3/r"}],[{L:"L4a",F:"F4/r"},{L:"L1o",F:"F1/r"},{L:"L5b",F:"F4/r"}],[{L:"L5a",F:"F4/r"},{L:"L1o",F:"F1/r"},{L:"L5b",F:"F4/r"}]],[[{L:"L4b",F:"F4/r"},{L:"L1o",F:"F4/r"},{L:"L4b",F:"F4/r"}],[{L:"L4b",F:"F4/r"},{L:"L1o",F:"F4/r"},{L:"L4b",F:"F4/r"}],[{L:"L5b",F:"F4/r"},{L:"L1o",F:"F4/r"},{L:"L5b",F:"F4/r"}],[{L:"L5b",F:"F4/r"},{L:"L1o",F:"F4/r"},{L:"L5b",F:"F4/r"}]],[[{L:"L4b",F:"F4/r"},{L:"L1o",F:"F4/r"},{L:"L4c",F:"F4/r"}],[{L:"L4b",F:"F4/r"},{L:"L1o",F:"F4/r"},{L:"L4c",F:"F4/r"}],[{L:"L5b",F:"F4/r"},{L:"L1o",F:"F4/r"},{L:"L5c",F:"F4/r"}],[{L:"L5b",F:"F4/r"},{L:"L1o",F:"F4/r"},{L:"L5c",F:"F4/r"}]]];
+
+var HINTS={R:{"1":"R1: Személyek esetenként, korlátozott anyagi kár.","2":"R2: Rendszeres személyforgalom, közepes értékű berendezések.","3":"R3: Személyek védelme kiemelt. Kórház, iskola, múzeum.","4":"R4: Fokozottan tűz/robbanásveszélyes — A, B tűzveszélyességi osztály.","5":"R5: Legmagasabb kockázat. Robbanóanyag, üzemanyag, vegyipari főépület."},M:{"1":"M1: ≤10 m — alacsony kockázat.","2":"M2: 10–25 m — közepes kockázat.","3":"M3: 25–60 m — fokozott kockázat.","4":"M4: >60 m — különleges tervezés szükséges."},T:{"1":"T1: Nem égő — villámcsapás nem okoz tüzet a tetőn, alacsonyabb fokozat elegendő.","2":"T2: Fémtető — természetes felfogóként is használható!","3":"T3: Közepesen égő — tűzveszély a becsapási ponton.","4":"T4: Könnyen égő — közvetlen tűzveszély, fokozott fokozat kell.","5":"T5: Könnyen égő + éghető szerkezet — szigetelő tartórúd kötelező (4.3.3.1. §)!"},K:{"1":"K1: Nem égő fal — levezető a falhoz közel vezethető.","2":"K2: Fémfal — természetes levezető → mindig L1o fokozat!","3":"K3: Égő fal — levezető b vagy c fokozat szükséges."},S:{"1":"S1: Normál — n méretfokozat elegendő (R1–R2 esetén).","2":"S2: Enyhe szennyezettség — k méretfokozat szükséges.","3":"S3: Erős szennyezettség — e méretfokozat + korrózióvédelem kötelező.","4":"S4: Agresszív — ek méretfokozat szükséges."},H:{"1":"H1 → B0: Nincs belső villámvédelmi intézkedés szükséges.","2":"H2 → B1: Potenciálkiegyenlítő kötések a veszélyes megközelítési helyeken.","3":"H3 → B2e: PE kötések + koordinált SPD (T1/T2/T3) az összes belépési ponton.","4":"H4 → B3e: PE + SPD + fémburkolatos árnyékolás (7.4.4. §).","5":"H5 → B4e: ROBBANÁSVESZÉLY! Teljes PE + I. szint + tokozott szikraközök!"},E:{"1":"Kiemelkedő helyzet — akár 5–10× több villámcsapás! Magasabb fokozat javasolt.","2":"Átlagos kockázat — a táblázat szerinti fokozat megfelelő.","3":"Csökkentett kockázat a szomszédok árnyékoló hatása miatt.","4":"Alacsony kockázat — védett, mélyedésben lévő helyszín."}};
+var SHORTV={R:{"1":"R1","2":"R2","3":"R3","4":"R4","5":"R5"},M:{"1":"M1 (≤10 m)","2":"M2 (10–25 m)","3":"M3 (25–60 m)","4":"M4 (>60 m)"},T:{"1":"T1 – nem égő","2":"T2 – fémtető","3":"T3 – köz. égő","4":"T4 – k.égő","5":"T5 – égő+szerkezet"},K:{"1":"K1 – nem égő","2":"K2 – fémfal","3":"K3 – égő"},S:{"1":"S1 – normál","2":"S2 – enyhe","3":"S3 – erős","4":"S4 – agresszív"},H:{"1":"H1 → B0","2":"H2 → B1","3":"H3 → B2e","4":"H4 → B3e","5":"H5 → B4e"},E:{"1":"Egyedül álló","2":"Hasonló épületek","3":"Városi","4":"Mélyedés"}};
+var fmode='eredő';
+var curV,curL,curF,curM;
+
+function g(id){return document.getElementById(id);}
+function fmt(n){return n.toFixed(2).replace('.',',');}
+
+// ====== MODAL ======
+function showDetail(cat,key){
+  var d=DETAILS[cat]&&DETAILS[cat][key];
+  if(!d)return;
+  g('mtitle').textContent=d.title;
+  var h='<div class="mcode">'+d.title.split(': ')[1]+'</div>';
+  h+='<div class="mname">'+d.name+'</div>';
+  h+='<div class="mdesc">'+d.desc+'</div>';
+  if(d.tags&&d.tags.length){d.tags.forEach(function(t){h+='<span class="mtag">'+t+'</span>';});}
+  if(d.items&&d.items.length){
+    h+='<div class="msub">Részletek</div>';
+    d.items.forEach(function(it){h+='<div class="mitem"><b>'+it.b+'</b> '+it.t+'</div>';});
+  }
+  g('mbody').innerHTML=h;
+  g('ov').classList.add('on');
+  g('modal').classList.add('on');
+}
+
+function showBadgeDetail(code,cat){
+  // fokozat kódból meghatározza melyik detail-t nyissa meg
+  var key='';
+  if(cat==='V'){
+    if(code==='V0o')key='V0o';
+    else if(code==='V1o')key='V1o';
+    else if(code.startsWith('V2'))key='V2';
+    else if(code.startsWith('V3'))key='V3';
+    else if(code.startsWith('V4'))key='V4';
+    else if(code.startsWith('V5'))key='V5';
+    else if(code.startsWith('V6'))key='V6';
+  } else if(cat==='L'){
+    if(code==='L0o')key='L0o';
+    else if(code==='L1o')key='L1o';
+    else if(code.startsWith('L2'))key='L2';
+    else if(code.startsWith('L3'))key='L3';
+    else if(code.startsWith('L4'))key='L4';
+    else if(code.startsWith('L5'))key='L5';
+  } else if(cat==='F'){
+    if(code.startsWith('F0'))key='F0';
+    else if(code.startsWith('F1'))key='F1';
+    else if(code.startsWith('F2'))key='F2';
+    else if(code.startsWith('F3'))key='F3';
+    else if(code.startsWith('F4'))key='F4';
+  } else if(cat==='meret'){
+    key=code;
+  }
+  if(key) showDetail(cat,key);
+}
+
+function closeModal(){
+  g('ov').classList.remove('on');
+  g('modal').classList.remove('on');
+}
+
+// ====== TABS ======
+function tab(name,idx){
+  document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on');});
+  document.querySelectorAll('.t').forEach(function(t){t.classList.remove('on');});
+  g('pg-'+name).classList.add('on');
+  document.querySelectorAll('.t')[idx].classList.add('on');
+}
+
+// ====== SELECT UPDATE ======
+function upd(id,val){
+  var sv=g('sv_'+id);
+  if(sv) sv.textContent=val?(SHORTV[id]&&SHORTV[id][val]||val):'—';
+  var h=g('hint');
+  if(h&&HINTS[id]&&HINTS[id][val]){h.textContent=HINTS[id][val];h.classList.add('on');}
+  else if(h&&!val){h.classList.remove('on');}
+}
+
+function resetAll(){
+  ['R','M','T','K','S','H','E'].forEach(function(id){g(id).value='';g('sv_'+id).textContent='—';});
+  var h=g('hint');h.textContent='';h.classList.remove('on');
+  g('er0').style.display='block';g('er1').style.display='none';
+}
+
+function getMeret(r,s){return[["n","k","e","ek"],["k","k","e","ek"],["k","e","e","ek"]][(r<=2)?0:(r==3)?1:2][s-1];}
+
+// ====== BESOROLÁS ======
+function besorolas(){
+  var R=parseInt(g('R').value),M=parseInt(g('M').value),T=parseInt(g('T').value),
+      K=parseInt(g('K').value),S=parseInt(g('S').value),H=parseInt(g('H').value),E=parseInt(g('E').value);
+  if(!R||!M||!T||!K||!S||!H||!E){alert('Kérem válasszon minden mezőből!');return;}
+  var V=VT[R-1][T-1][M-1];
+  var lf=(K===2)?{L:"L1o",F:LFT[R-1][M-1][0].F}:LFT[R-1][M-1][(K===1)?0:2];
+  var L=lf.L,F=lf.F,meret=getMeret(R,S);
+  var B=['B0','B1','B2e','B3e','B4e'][H-1];
+  curV=V;curL=L.split('/')[0];curF=F.split(' ')[0]||F;curM=meret;
+
+  function ba(cls,v,l,cat){
+    var n=(v==='V0o'||v==='L0o'||v==='F0/x');
+    return '<div class="ba '+(n?'bN':cls)+'" onclick="showBadgeDetail(\''+v+'\',\''+cat+'\')">'
+      +'<div class="baL">'+l+'</div><div class="baV">'+v+'</div>'
+      +'<div style="font-size:9px;color:rgba(255,255,255,.3);margin-top:2px">koppints ›</div>'
+      +'</div>';
+  }
+  g('badges').innerHTML=
+    ba('bVc',V,'Felfogó','V')+ba('bLc',L.split('/')[0],'Levezető','L')+
+    ba((F==='F0/x'?'bN':'bFc'),F.split(' ')[0]||F,'Földelés','F')+
+    ba('bMc',meret,'Méret','meret')+ba('bBc',B,'Belső VV','B');
+
+  g('jel').textContent=V+' – '+L.split('/')[0]+' – '+F+' – '+meret+' – '+B;
+
+  var al='';
+  if(V==='V0o')al+='<div class="al ok">✓ Villámhárító nem szükséges az MSZ 274/3–81 szerint.</div>';
+  else al+='<div class="al wa">⚡ Villámhárító szükséges! Előírt fokozat: '+V+' – '+L.split('/')[0]+' – '+F+'</div>';
+  if(R>=4)al+='<div class="al er">🔥 R4/R5: tűz-/robbanásveszélyes épület — PE kötések kötelezők (7.2.2. §).</div>';
+  if(T>=4)al+='<div class="al wa">🏠 T4/T5: könnyen égő tető — szigetelő tartórúd kötelező (4.3.3.1. §).</div>';
+  if(H>=4){var ff=F.split(' ')[0];if(ff==='F0/x'||ff==='F1/x'||ff==='F2/x')al+='<div class="al er">⚠ B3e/B4e esetén min. F3/r szükséges! (TvMI 7.6, 10.3.4.4.)</div>';}
+  g('alerts').innerHTML=al;
+
+  function mk(k,v,c,n){return '<div class="kv"><span class="kk">'+k+(n?'<br><span style="font-size:11px;color:var(--t3)">'+n+'</span>':'')+'</span><span class="vv '+c+'">'+v+'</span></div>';}
+  var kv='';
+  kv+=mk('Felfogó (V):',V,'ci','Koppints a badge-re a részletekért');
+  kv+=mk('Levezető (L):',L.split('/')[0],'cw','Koppints a badge-re a részletekért');
+  kv+=mk('Földelés (F):',F,'cs','Koppints a badge-re a részletekért');
+  kv+=mk('Méretfokozat:',meret,'ca',{n:'Szalag min. 10×3 mm, huzal Ø6 mm',k:'Szalag min. 20×3 mm, huzal Ø8 mm',e:'Szalag min. 20×5 mm, huzal Ø10 mm — korrózióvédelem!',ek:'Erős különleges — speciális anyag agresszív közegben!'}[meret]||'');
+  kv+=mk('Belső VV fokozat:',B,'cp','MSZ 274-3-2M:2001 + TvMI 7.6:2024.02.01.');
+  if(K===2)kv+=mk('K2 megjegyzés:','L1o kényszer','ca','Fémfal = természetes levezető');
+  g('kvwrap').innerHTML=kv;
+
+  var bm={"1":"H1 – B0: Nincs szükséges belső villámvédelmi intézkedés.","2":"H2 – B1: Potenciálkiegyenlítő kötések a veszélyes megközelítési helyeken (7. fejezet). Belépési ponton PE-kötés az erősáramú hálózathoz (7.3.4. §).","3":"H3 – B2e: PE kötések + koordinált SPD. T1: főelosztóba, T2: alelosztókba, T3: készülékek közelébe (7.3.4., 7.4.6. §).","4":"H4 – B3e: PE + koordinált SPD + fémburkolatos árnyékolás (7.4.4. §). II. villámvédelmi szint paraméterei.","5":"H5 – B4e – ROBBANÁSVESZÉLY! Teljes PE + I. szint + tokozott szikraközök (8.4.3. §) + mozgó elemek ≥100 mm² hajlékony összekötővel (7.2.2. §)."};
+  g('bsec').innerHTML='<strong>'+bm[H]+'</strong>';
+
+  var em='';
+  if(E===1)em='<div class="al wa">⚠ Kiemelkedő elhelyezés! Akár 5–10× több villámcsapás. Magasabb fokozat javasolt.</div>';
+  else if(E===4)em='<div class="al in">ℹ Kedvező elhelyezés — az előírt fokozat elegendő.</div>';
+  else em='<div style="font-size:13px;color:var(--t3)">Átlagos kockázat — a táblázat szerinti fokozat megfelelő.</div>';
+  g('elhwrap').innerHTML=em;
+
+  g('er0').style.display='none';g('er1').style.display='block';
+  calcS();tab('er',1);
+}
+
+function calcS(){var l=parseFloat(g('sl').value)||0;g('sr').textContent=fmt(l/20)+' m';}
+
+function setMode(m,btn){
+  fmode=m;
+  document.querySelectorAll('.sb').forEach(function(b){b.classList.remove('on');});
+  btn.classList.add('on');
+  var msgs={'eredő':'Összefüggő rendszer: r ≤ 3·√(ρ/A)','egyedi':'Egyedi / leválasztható: r ≤ 6·√(ρ/A)','fix2':'F4/r gyűrűs/hálós rendszer: r ≤ 2 Ω (fix korlát)'};
+  g('mhint').textContent=msgs[m];foldCalc();
+}
+
+function rhoChg(val){
+  var sv=g('sv_RHO');
+  if(val==='mert'){sv.textContent='Mért érték';g('mertbox').classList.add('on');}
+  else{sv.textContent=val?parseFloat(val)+' Ω·m':'—';g('mertbox').classList.remove('on');foldCalc();}
+}
+
+function getRho(){
+  var v=g('RHO').value;
+  if(!v)return NaN;
+  if(v==='mert')return parseFloat(g('rhom').value)||NaN;
+  return parseFloat(v)||NaN;
+}
+
+function foldCalc(){
+  var h=parseFloat(g('fh').value),s=parseFloat(g('fs').value),rho=getRho();
+  if(!h||!s||isNaN(rho)){g('fo_res').style.display='none';return;}
+  var A=h*s,rmax,fstr;
+  if(fmode==='fix2'){rmax=2;fstr='r ≤ 2 Ω (F4/r fix korlát)';}
+  else{var k=(fmode==='eredő')?3:6;rmax=k*Math.sqrt(rho/A);fstr='r ≤ '+k+' · √('+rho+' / '+Math.round(A)+') = '+fmt(rmax)+' Ω';}
+  g('fA').textContent=Math.round(A);g('fRho').textContent=rho;
+  g('rhosrc').textContent='Ω·m '+(g('RHO').value==='mert'?'(mért)':'(táblázat)');
+  g('fRmax').textContent=fmt(rmax);g('fForm').textContent=fstr;
+  var al='';
+  if(rmax<=2)al='<div class="al ok">✓ r ≤ 2 Ω — F4/r fokozat szükséges. Betonalapföldelés általában elegendő.</div>';
+  else if(rmax<=10)al='<div class="al ok">✓ r<sub>max</sub> = '+fmt(rmax)+' Ω — normál mesterséges földelők megfelelők lehetnek.</div>';
+  else al='<div class="al wa">⚠ Nagy r<sub>max</sub> ('+fmt(rmax)+' Ω) — több vagy mélyebb földelőrúd szükséges.</div>';
+  if(rho>=500)al+='<div class="al er">🪨 Nagyon magas ρ ('+rho+' Ω·m) — mélyföldelő rúd, keretföldelő vagy betonalapföldelés szükséges!</div>';
+  if(g('RHO').value!=='mert')al+='<div class="al in" style="font-size:12px">ℹ Becsült ρ értékkel számolva. Pontosabb eredményhez végezzen helyszíni mérést (MSZ 4851/2 szerint).</div>';
+  g('foal').innerHTML=al;g('fo_res').style.display='block';
+}
+</script>
+</body>
+</html>
